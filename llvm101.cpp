@@ -94,10 +94,7 @@ func_t
 Engine::get_function(Op op1, Op op2) {
     static int counter = 0;
     auto func_name = "func_" + std::to_string(counter++);
-
-    // TODO: insert code for funcion here!!
-    // TODO: notice that builder, ctx, M is ready at "this" pointer
-
+    
     FunctionType* func_type = FunctionType::get(
         Type::getVoidTy(ctx),
         {Type::getInt32Ty(ctx), Type::getInt32PtrTy(ctx), Type::getInt32PtrTy(ctx), Type::getInt32PtrTy(ctx), Type::getInt32PtrTy(ctx)},
