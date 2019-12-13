@@ -138,16 +138,17 @@ Engine::get_function(Op op1, Op op2) {
 
         // condition branch
         builder.SetInsertPoint(if_b);
-        auto now_i = builder.CreateLoad(i, "now_i");
-        auto if_cond = builder.CreateICmpSLT(now_i, size, "i_slt_size");
+        auto condition_i = builder.CreateLoad(i, "condition_i");
+        auto if_cond = builder.CreateICmpSLT(condition_i, size, "i_slt_size");
         builder.CreateCondBr(if_cond, then_b, post_b);
 
         // then branch
         builder.SetInsertPoint(then_b);
-        auto tmp_a_ptr = builder.CreateGEP(input_a, now_i, "tmp_a_ptr");
-        auto tmp_b_ptr = builder.CreateGEP(input_b, now_i, "tmp_b_ptr");
-        auto tmp_c_ptr = builder.CreateGEP(input_c, now_i, "tmp_c_ptr");
-        auto tmp_d_ptr = builder.CreateGEP(input_d, now_i, "tmp_d_ptr");
+        auto body_i = builder.CreateLoad(i, "body_i");
+        auto tmp_a_ptr = builder.CreateGEP(input_a, body_i, "tmp_a_ptr");
+        auto tmp_b_ptr = builder.CreateGEP(input_b, body_i, "tmp_b_ptr");
+        auto tmp_c_ptr = builder.CreateGEP(input_c, body_i, "tmp_c_ptr");
+        auto tmp_d_ptr = builder.CreateGEP(input_d, body_i, "tmp_d_ptr");
 
         auto tmp_a = builder.CreateLoad(tmp_a_ptr, "tmp_a");
         auto tmp_b = builder.CreateLoad(tmp_b_ptr, "tmp_b");
@@ -159,12 +160,12 @@ Engine::get_function(Op op1, Op op2) {
         res->setName("tmp_result");
         builder.CreateStore(res, tmp_d_ptr);
 
-        builder.CreateStore(builder.CreateAdd(now_i, builder.getInt32(1), "next_i"), i);
+        builder.CreateStore(builder.CreateAdd(body_i, builder.getInt32(1), "next_i"), i);
         builder.CreateBr(if_b);
 
         // post branch
         builder.SetInsertPoint(post_b);
-        builder.CreateRet(nullptr);
+        builder.CreateRetVoid();
 
         return function;
     }();
